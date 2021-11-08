@@ -1,0 +1,80 @@
+1.  Create a git repository on github and add branch "gl_task" for this project.
+
+2.  Create a C application "gl_configurator". It shall create a config file in "/etc/sp.cfg" for
+    storing some configuration. If the file already exists, it shall not create a new one.
+
+4.  Create a Makefile for this project.
+
+5.  The syntax of the "/etc/sp.cfg" shall be the following:
+
+    interface <s_p>
+        <option1_name> "<option1_value>"
+        ...
+        <optionN_name> "<optionN_value>"
+
+    where:
+        <s_p> - slot/port, examples: 0/1, 5/128. The "interface" group is created per each slot/port.
+        <option_name> - the name of the option, up to 32 characters length.
+        <option_value> - the value of the option, up to 32 characters length.
+
+6.  The application shall support 3 types of commands: "add", "get" and "del".
+
+6.1 "add" - create a new entry in config file or update the existing one
+    $> ./gl_configurator add "<s_p>" "<option_name>" "<option_value>"
+    $> ./gl_configurator add "<s_p_range>" "<option_name>" "<option_value>"
+
+    Examples:
+    $> ./gl_configurator add "0/16" "ipaddr" "10.10.10.10"
+    $> ./gl_configurator add "0/16" "netmask" "255.255.255.0"
+
+    $> ./gl_configurator add "1/5-1/7" "ip" "20.20.20.20"
+    $> ./gl_configurator add "1/5-1/7" "protocol" "ipv4"
+
+    Shall produce in /etc/sp.cfg:
+
+    interface 0/16
+        ipaddr "10.10.10.10"
+        netmask "255.255.255.0"
+
+    interface 1/5
+        ipaddr "20.20.20.20"
+        protocol "ipv4"
+
+    interface 1/6
+        ipaddr "20.20.20.20"
+        protocol "ipv4"
+
+    interface 1/7
+        ipaddr "20.20.20.20"
+        protocol "ipv4"
+
+    Note, range is applicable only to ports, so <s_p_range> like "1/5-2/3" shall not be supported.
+
+6.2 "get" - get the value of the option
+    $> ./gl_configurator get "<s_p>" "<option_name>"
+
+    Examples:
+    $> ./gl_configurator get "0/16" "ipaddr"
+    "10.10.10.10"
+    $> ./gl_configurator get "1/7" "blabla"
+    Error: option not found
+    $> ./gl_configurator get "1/8" "protocol"
+    Error: s/p not found
+
+6.3 "del" - delete the option
+    $> ./gl_configurator del "<s_p>" "<option_name>"
+
+    Examples:
+    $> ./gl_configurator del "0/16" "ipaddr"
+    $> ./gl_configurator del "0/16" "ipaddr"
+    Error: option not found
+    $> ./gl_configurator del "1/8" "protocol"
+    Error: s/p not found
+
+7.  Optional. Advanced task: separate CLI processing level and config parser, so that there is a
+    static/dynamic library that provides 3 APIs - add, get, del - and a CLI processor that parses
+    user input and calls appropriate functions of the core parsing library.
+
+8.  Implementation requirements:
+    - OS - Linux or portable code for different OS;
+    - Зrogramming language - С (not less than 11 standard).
