@@ -1,5 +1,7 @@
 #pragma once
 
+#define MAX_NAME_LEN 32
+#define MAX_VALUE_LEN 32
 typedef enum tCommand {
     CMD_EMPTY = 0,
     CMD_ADD,
@@ -13,8 +15,8 @@ typedef struct tCommandParam {
     int port;
     int slotRange; // -1 if range is not used
     int portRange; // -1 if range is not used
-    char option[33];
-    char value[33];
+    char option[MAX_NAME_LEN+1];
+    char value[MAX_VALUE_LEN+1];
 } tCommandParam;
 
 int cfgAdd(const char *fName, const tCommandParam *const param);

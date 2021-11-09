@@ -37,6 +37,7 @@ int parseSlotPort(const char *opt, tCommandParam *params) {
             params->slotRange = -1;
             params->portRange = -1;
         } else {
+            fprintf(stderr, "Unrecognised slot-port pair <%s>\n", opt);
             readedParams = -1;
         }
     }
@@ -66,32 +67,65 @@ int main(int argc, char* argv[]) {
     switch (command) {
         case CMD_ADD:
         {
+            if (argc != 5) {
+                fprintf(stderr, "Incorrect number of add params\n");
+                exitCode = -2;
+                break;
+            }
             char *strSlotPort = argv[2];
             int params = parseSlotPort(strSlotPort, &cmdParams);
             if (params < 0) {
-                fprintf(stderr, "Unrecognised slot-port pair <%s>", strSlotPort);
                 exitCode = -2;
+                break;
             }
+            const char *name = argv[3];
+            const char *value = argv[4];
+            if (strlen(name) > MAX_NAME_LEN) {
+                fprintf(stderr, "Name length too long\n");
+                exitCode = -3;
+                break;
+            }
+            if (strlen(value) > MAX_VALUE_LEN) {
+                fprintf(stderr, "Value length too long\n");
+                exitCode = -4;
+                break;
+            }
+            stncpy(cmdParams.option, name);
+            stncpy(cmdParams.value, value);
         }
         break;
         case CMD_GET:
         {
+            if (argc != 4) {
+                fprintf(stderr, "Incorrect number of get params\n");
+                exitCode = -2;
+                break;
+            }
             char *strSlotPort = argv[2];
             int params = parseSlotPort(strSlotPort, &cmdParams);
-            if (params < 0) {
-                fprintf(stderr, "Unrecognised slot-port pair <%s>", strSlotPort);
+            if (params < 0)
                 exitCode = -2;
+            const char *name = argv[3];
+            if (strlen(name) > MAX_NAME_LEN) {
+                fprintf(stderr, "Name length too long\n");
+                exitCode = -3;
+                break;
             }
+            stncpy(cmdParams.option, name);
+            cmdParams.value[0] = '\0';
         }
         break;
         case CMD_DEL:
         {
+            if (argc != 4) {
+                fprintf(stderr, "Incorrect number of del params\n");
+                exitCode = -2;
+                break;
+            }
             char *strSlotPort = argv[2];
             int params = parseSlotPort(strSlotPort, &cmdParams);
-            if (params < 0) {
-                fprintf(stderr, "Unrecognised slot-port pair <%s>", strSlotPort);
+            if (params < 0)
                 exitCode = -2;
-            }
         }
         break;
         default:
