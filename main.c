@@ -163,6 +163,10 @@ int main(int argc, char* argv[]) {
             break;
         case CMD_GET:
             exitCode = cfgGet(configPath, &cmdParams);
+            if (exitCode > 0) {
+                printf("\"%s\"\n", cmdParams.value);
+                exitCode = 0;
+            }
             break;
         case CMD_DEL:
             exitCode = cfgDel(configPath, &cmdParams);

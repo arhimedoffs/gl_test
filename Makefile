@@ -41,3 +41,6 @@ test: ${TARGET}
 	./${TARGET} del "0/3" "nameRange"
 	./${TARGET} del "0/0" "nameNotExist"
 	./${TARGET} del "2/2" "nameSome"
+
+test_get: ${TARGET}
+	./${TARGET} get "1/2" "name1"

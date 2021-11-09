@@ -54,11 +54,11 @@ void interfaceListDelete(TInterface *list) {
     }
 }
 
-void interfaceListWrite(FILE *file, TInterface *list) {
+void interfaceListWrite(FILE *file, const TInterface *list) {
     if(file == NULL)
         return;
     while (list != NULL) {
-        fprintf(file, "interface %d/%d\n", list->slot, list->slot);
+        fprintf(file, "interface %d/%d\n", list->slot, list->port);
         for(int i = 0; i < list->optionsCount; i++)
             fprintf(file, "    %s \"%s\"\n", list->options[i].name, list->options[i].value);
         fprintf(file, "\n");
@@ -156,8 +156,7 @@ int isEmptyString(const char* str) {
 /**
  * Read configuration from file
  * @param fname file name
- * @param interfaces pointer to set of readed interfaces
- * @return number of successfuly readed interfaces
+ * @return pointer to set of readed interfaces
  */
 TInterface* readConfigFromFile(const char *fname) {
     FILE *file = fopen(fname, "r");
@@ -204,6 +203,8 @@ TInterface* readConfigFromFile(const char *fname) {
             } else {
                 lastInterface = lastInterface->pNext = newInterface;
             }
+            lastInterface->slot = slot;
+            lastInterface->port = port;
         } else { // option line
             if (lastInterface == NULL) {
                 fprintf(stderr, "Option line before interface definition\n");
@@ -240,6 +241,21 @@ TInterface* readConfigFromFile(const char *fname) {
 }
 
 /**
+ * Write configuration to file
+ * @param fname file name
+ * @param interfaces pointer to set of readed interfaces
+ */
+void writeConfigToFile(const char *fname, const TInterface *interfaceList) {
+    FILE *file = fopen(fname, "w");
+    if (file == NULL) {
+        fprintf(stderr, "Failed to open file for write <%s>\n", fname);
+        return;
+    }
+    interfaceListWrite(file, interfaceList);
+    fclose(file);
+}
+
+/**
  * Add or modify interface options
  * @return number of successfully modified options, -1 if error occured
  */
@@ -248,12 +264,40 @@ int cfgAdd(const char *fName, const tCommandParam *const param) {
     UNUSED(param);
     return 0;
 }
-int cfgGet(const char *fName, const tCommandParam *const param) {
-    UNUSED(fName);
-    UNUSED(param);
+int cfgGet(const char *fName, tCommandParam *const param) {
+    if((fName == NULL) || (param == NULL))
+        return -1;
+    
     TInterface *interfaceList = readConfigFromFile(fName);
-    interfaceListWrite(stdout, interfaceList);
-    return 0;
+    if (interfaceList == NULL)
+        return 0;
+
+    int result = 0;
+
+    TInterface *interface = interfaceList;
+    while (interface != NULL) {
+        if ((interface->slot == param->slot) && (interface->port == param->port))
+            break;
+        interface = interface->pNext;
+    }
+
+    if (interface == NULL) {
+        fprintf(stderr, "Error: s/p not found\n");
+    } else {
+        int optionIndex = 0;
+        for (optionIndex = 0; optionIndex < interface->optionsCount; optionIndex++)
+            if(strcmp(param->option, interface->options[optionIndex].name) == 0)
+                break;
+        if (optionIndex >= interface->optionsCount)
+            fprintf(stderr, "Error: option not found\n");
+        else {
+            strcpy(param->value, interface->options[optionIndex].value);
+            result = 1;
+        }
+    }
+
+    interfaceListDelete(interfaceList);
+    return result;
 }
 int cfgDel(const char *fName, const tCommandParam *const param) {
     UNUSED(fName);

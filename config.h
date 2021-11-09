@@ -29,7 +29,7 @@ int cfgAdd(const char *fName, const tCommandParam *const param);
  * Print option value for selected name
  * @return 1 if success, -1 if error occured
  */
-int cfgGet(const char *fName, const tCommandParam *const param);
+int cfgGet(const char *fName, tCommandParam *const param);
 
 /**
  * Delete interface options

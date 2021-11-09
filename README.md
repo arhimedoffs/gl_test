@@ -14,6 +14,7 @@
 - [ ] implement `get` method
 - [ ] implement `add` method
 - [ ] implement `del` method
+- [ ] cleanup code formatting and styling
 - [ ] extract source to separate folders
 - [ ] build into separate folder
 - [ ] separate configuration management as static libary
