@@ -159,7 +159,22 @@ int main(int argc, char* argv[]) {
     
     switch (command) {
         case CMD_ADD:
-            exitCode = cfgAdd(configPath, &cmdParams);
+            if (cmdParams.slotRange < 0 && cmdParams.portRange < 0) {
+                exitCode = cfgAdd(configPath, &cmdParams);
+            } else if (cmdParams.slot != cmdParams.slotRange) {
+                fprintf(stderr, "Slot range not implemented!\n");
+                exitCode = 1;
+            } else if (cmdParams.port > cmdParams.portRange) {
+                fprintf(stderr, "Incorrect port range!\n");
+                exitCode = 1;
+            } else {
+                for (int i = cmdParams.port; i <= cmdParams.portRange; i++) {
+                    cmdParams.port = i;
+                    exitCode = cfgAdd(configPath, &cmdParams);
+                }
+            }
+            if (exitCode > 0)
+                exitCode = 0;
             break;
         case CMD_GET:
             exitCode = cfgGet(configPath, &cmdParams);
