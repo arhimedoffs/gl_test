@@ -32,7 +32,8 @@ run: ${TARGET}
 .PHONY: test
 test: ${TARGET}
 	./${TARGET} add "0/0" "name1" "value1"
-	./${TARGET} add "0/1-3" "nameRange" "valueRange"
+	./${TARGET} add "0/1-0/3" "nameRange" "valueRange"
+	./${TARGET} add "1/1-2/2" "nameRange2" "valueRange2"
 	./${TARGET} add "0/2" "nameRange" "valueNew"
 	./${TARGET} get "0/2" "nameRange"
 	./${TARGET} get "0/0" "nameNotExist"
