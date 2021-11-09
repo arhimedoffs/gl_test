@@ -10,7 +10,7 @@
     - [ ] if incorrect data is present then show corresponding message
 - [ ] write configuration structures to file
 - [x] stub for configuration methods
-- [ ] parse command line arguments
+- [x] parse command line arguments
 - [ ] implement `get` method
 - [ ] implement `add` method
 - [ ] implement `del` method

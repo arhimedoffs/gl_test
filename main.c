@@ -44,6 +44,26 @@ int parseSlotPort(const char *opt, tCommandParam *params) {
     return readedParams;
 }
 
+int parseOptionName(const char *opt, tCommandParam *params) {
+    int len = strlen(opt);
+    if (len > MAX_NAME_LEN) {
+        fprintf(stderr, "Name length too long\n");
+        return -1;
+    }
+    strcpy(params->option, opt);
+    return len;
+}
+
+int parseOptionValue(const char *opt, tCommandParam *params) {
+    int len = strlen(opt);
+    if (len > MAX_NAME_LEN) {
+        fprintf(stderr, "Value length too long\n");
+        return -1;
+    }
+    strcpy(params->value, opt);
+    return len;
+}
+
 int main(int argc, char* argv[]) {
     if (argc == 1) {
         printHelp();
@@ -72,26 +92,21 @@ int main(int argc, char* argv[]) {
                 exitCode = -2;
                 break;
             }
-            char *strSlotPort = argv[2];
-            int params = parseSlotPort(strSlotPort, &cmdParams);
-            if (params < 0) {
+            const char *strSlotPort = argv[2];
+            const char *name = argv[3];
+            const char *value = argv[4];
+            if (parseSlotPort(strSlotPort, &cmdParams) < 0) {
                 exitCode = -2;
                 break;
             }
-            const char *name = argv[3];
-            const char *value = argv[4];
-            if (strlen(name) > MAX_NAME_LEN) {
-                fprintf(stderr, "Name length too long\n");
+            if (parseOptionName(name, &cmdParams) < 0) {
                 exitCode = -3;
                 break;
             }
-            if (strlen(value) > MAX_VALUE_LEN) {
-                fprintf(stderr, "Value length too long\n");
+            if (parseOptionValue(value, &cmdParams) < 0) {
                 exitCode = -4;
                 break;
             }
-            stncpy(cmdParams.option, name);
-            stncpy(cmdParams.value, value);
         }
         break;
         case CMD_GET:
@@ -102,16 +117,15 @@ int main(int argc, char* argv[]) {
                 break;
             }
             char *strSlotPort = argv[2];
-            int params = parseSlotPort(strSlotPort, &cmdParams);
-            if (params < 0)
-                exitCode = -2;
             const char *name = argv[3];
-            if (strlen(name) > MAX_NAME_LEN) {
-                fprintf(stderr, "Name length too long\n");
+            if (parseSlotPort(strSlotPort, &cmdParams) < 0) {
+                exitCode = -2;
+                break;
+            }
+            if (parseOptionName(name, &cmdParams) < 0) {
                 exitCode = -3;
                 break;
             }
-            stncpy(cmdParams.option, name);
             cmdParams.value[0] = '\0';
         }
         break;
@@ -123,9 +137,16 @@ int main(int argc, char* argv[]) {
                 break;
             }
             char *strSlotPort = argv[2];
-            int params = parseSlotPort(strSlotPort, &cmdParams);
-            if (params < 0)
+            const char *name = argv[3];
+            if (parseSlotPort(strSlotPort, &cmdParams) < 0) {
                 exitCode = -2;
+                break;
+            }
+            if (parseOptionName(name, &cmdParams) < 0) {
+                exitCode = -3;
+                break;
+            }
+            cmdParams.value[0] = '\0';
         }
         break;
         default:
