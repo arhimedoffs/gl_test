@@ -1,10 +1,11 @@
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define UNUSED(x) (void)(x)
 
-typedef unsigned int uint;
+#define OPTION_ALLOCATION_STEP 8
 
 typedef struct TOption {
     char name[MAX_NAME_LEN+1];
@@ -14,8 +15,8 @@ typedef struct TOption {
 typedef struct TInterface {
     int slot;
     int port;
-    uint optionsCount;
-    uint _optionsReserved;
+    int optionsCount;
+    int _optionsReserved;
     TOption *options;
     struct TInterface *pNext;
 } TInterface;
@@ -26,12 +27,12 @@ TInterface* interfaceCreate(void) {
     if (interface == NULL) {
         return NULL;
     }
-    interface->options = (TOption*)calloc(8, sizeof(TOption));
+    interface->options = (TOption*)calloc(OPTION_ALLOCATION_STEP, sizeof(TOption));
     if (interface->options == NULL) {
         free(interface);
         return NULL;
     }
-    interface->_optionsReserved = 8;
+    interface->_optionsReserved = OPTION_ALLOCATION_STEP;
     interface->optionsCount = 0;
     return interface;
 }
@@ -39,17 +40,80 @@ TInterface* interfaceCreate(void) {
 void interfaceDelete(TInterface *interface) {
     if (interface == NULL)
         return;
-    if (interface->options != NULL)
-        free(interface->options);
+    free(interface->options);
     free(interface);
 }
 
-void interfaceSetAdd(TInterface *set) {
-    UNUSED(set);
+/**
+ * @retval option index if found, negative othervise
+ */
+int interfaceOptionFind(const TInterface *interface, const char *optionName) {
+    if ((interface == NULL) || (optionName == NULL))
+        return -1;
+    if (interface->options == NULL)
+        return -1;
+    
+    int i = 0;
+    for (i = 0; i < interface->optionsCount; i++) {
+        if (strcmp(optionName, interface->options[i].name) == 0)
+            break;
+    }
+    return i;
 }
 
-void interfaceSetGet(TInterface *set) {
-    UNUSED(set);
+/**
+ * @return negative on error, 0 on update in place, positive on add new
+ */
+// TODO: check actual string values length
+int interfaceOptionSet(TInterface *interface, const char *optionName, const char *optionValue) {
+    if ((interface == NULL) || (optionName == NULL) || (optionValue == NULL))
+        return -1;
+    if (interface->options == NULL)
+        return -1;
+    
+    // Search if option already exist
+    int i = interfaceOptionFind(interface, optionName);
+
+    int retVal = 0;
+    if ((i >= 0) && (i < interface->optionsCount)) {
+        // Update existing option
+        strcpy(interface->options[i].value, optionValue);
+        retVal = 0;
+    } else {
+        // Add new option
+        if (interface->optionsCount >= interface->_optionsReserved) {
+            int newReserveCount = interface->_optionsReserved + OPTION_ALLOCATION_STEP;
+            TOption *newOptions = (TOption*)realloc(interface->options, newReserveCount*sizeof(TOption));
+            if (newOptions == NULL)
+                return -1;
+            interface->options = newOptions;
+            interface->_optionsReserved += OPTION_ALLOCATION_STEP;
+        }
+        int newIndex = interface->optionsCount++;
+        strcpy(interface->options[newIndex].name, optionName);
+        strcpy(interface->options[newIndex].value, optionValue);
+        retVal = 1;
+    }
+    return retVal;
+}
+
+/**
+ * @retval number of deleted elements, negative on error
+ */
+int interfaceOptionDel(TInterface *interface, const char *optionName) {
+    if ((interface == NULL) || (optionName == NULL))
+        return -1;
+    if (interface->options == NULL)
+        return -1;
+    
+    int optionIndex = interfaceOptionFind(interface, optionName);
+    if ((optionIndex < 0) || (optionIndex >= interface->optionsCount)) {
+        return 0;
+    }
+    for (int i  = optionIndex+1; i < interface->optionsCount; i++)
+        memcpy(&interface->options[i-1], &interface->options[i], sizeof(TOption));
+    memset(&interface->options[--interface->optionsCount], 0, sizeof(TOption));
+    return 1;
 }
 
 /**
