@@ -260,10 +260,56 @@ void writeConfigToFile(const char *fname, const TInterface *interfaceList) {
  * @return number of successfully modified options, -1 if error occured
  */
 int cfgAdd(const char *fName, const tCommandParam *const param) {
-    UNUSED(fName);
-    UNUSED(param);
-    return 0;
+    if((fName == NULL) || (param == NULL))
+        return -1;
+
+    // TODO: If file not exist try to create new
+
+    TInterface *interfaceList = readConfigFromFile(fName);
+    if (interfaceList == NULL)
+        return 0;
+
+    int result = 0;
+
+    TInterface *interface = interfaceList;
+    while (interface != NULL) {
+        if ((interface->slot == param->slot) && (interface->port == param->port))
+            break;
+        interface = interface->pNext;
+    }
+
+    if (interface == NULL) {
+        // Add new interface
+        TInterface *newInterface = interfaceCreate();
+        if (newInterface == NULL) {
+            fprintf(stderr, "cfgAdd internal error\n");
+            result = -1;
+        } else {
+            TInterface *lastInterface = interfaceList;
+            while(lastInterface->pNext != NULL)
+                lastInterface = lastInterface->pNext;
+            lastInterface = lastInterface->pNext = newInterface;
+            newInterface = NULL;
+            lastInterface->slot = param->slot;
+            lastInterface->port = param->port;
+            interfaceOptionSet(lastInterface, param->option, param->value);
+            result = 1;
+        }
+    } else {
+        interfaceOptionSet(interface, param->option, param->value);
+        result = 1;
+    }
+    if (result >= 0)
+        writeConfigToFile(fName, interfaceList);
+
+    interfaceListDelete(interfaceList);
+    return result;
 }
+
+/**
+ * Get option value if found
+ * @return negative on error, 0 if not found, 1 if success
+ */
 int cfgGet(const char *fName, tCommandParam *const param) {
     if((fName == NULL) || (param == NULL))
         return -1;
@@ -320,7 +366,7 @@ int cfgDel(const char *fName, const tCommandParam *const param) {
             fprintf(stderr, "Error: option not found\n");
         else {
             writeConfigToFile(fName, interfaceList);
-            result = 1
+            result = 1;
         }
     }
 
