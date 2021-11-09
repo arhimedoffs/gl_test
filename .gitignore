@@ -27,14 +27,7 @@
 *.so
 *.so.*
 *.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+.vscode/
 
 # Debug files
 *.dSYM/
@@ -50,3 +43,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# project specific
+gl_configurator
+.vscode/
