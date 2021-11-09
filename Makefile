@@ -1,14 +1,14 @@
-CC = gcc # C compiler
-CFLAGS = -Wall -Wextra -O2 -g # C flags
-LDFLAGS = # linking flags
-RM = rm -f # rm command
-TARGET = gl_configurator # target executable
+CC=gcc# C compiler
+CFLAGS=-Wall -Wextra -O2 -g# C flags
+LDFLAGS=# linking flags
+RM=rm -f# rm command
+TARGET=gl_configurator# target executable
 
-TEST_FILE = sp.cfg
+TEST_FILE=sp.cfg
 
-SRCS = main.c \
+SRCS=main.c \
 	config.c # source files
-OBJS = $(SRCS:.c=.o)
+OBJS=$(SRCS:.c=.o)
 
 .PHONY: all
 all: ${TARGET}
