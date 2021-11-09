@@ -284,11 +284,8 @@ int cfgGet(const char *fName, tCommandParam *const param) {
     if (interface == NULL) {
         fprintf(stderr, "Error: s/p not found\n");
     } else {
-        int optionIndex = 0;
-        for (optionIndex = 0; optionIndex < interface->optionsCount; optionIndex++)
-            if(strcmp(param->option, interface->options[optionIndex].name) == 0)
-                break;
-        if (optionIndex >= interface->optionsCount)
+        int optionIndex = interfaceOptionFind(interface, param->option);
+        if ((optionIndex < 0) || (optionIndex >= interface->optionsCount))
             fprintf(stderr, "Error: option not found\n");
         else {
             strcpy(param->value, interface->options[optionIndex].value);
@@ -300,7 +297,33 @@ int cfgGet(const char *fName, tCommandParam *const param) {
     return result;
 }
 int cfgDel(const char *fName, const tCommandParam *const param) {
-    UNUSED(fName);
-    UNUSED(param);
-    return 0;
+    if((fName == NULL) || (param == NULL))
+        return -1;
+    
+    TInterface *interfaceList = readConfigFromFile(fName);
+    if (interfaceList == NULL)
+        return 0;
+
+    int result = 0;
+
+    TInterface *interface = interfaceList;
+    while (interface != NULL) {
+        if ((interface->slot == param->slot) && (interface->port == param->port))
+            break;
+        interface = interface->pNext;
+    }
+
+    if (interface == NULL) {
+        fprintf(stderr, "Error: s/p not found\n");
+    } else {
+        if (interfaceOptionDel(interface, param->option) <= 0)
+            fprintf(stderr, "Error: option not found\n");
+        else {
+            writeConfigToFile(fName, interfaceList);
+            result = 1
+        }
+    }
+
+    interfaceListDelete(interfaceList);
+    return result;
 }
