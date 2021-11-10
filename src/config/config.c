@@ -306,12 +306,7 @@ int cfgAdd(const char *fName, const tCommandParam *const param) {
 
     int result = 0;
 
-    TInterface *interface = interfaceList;
-    while (interface != NULL) {
-        if ((interface->slot == param->slot) && (interface->port == param->port))
-            break;
-        interface = interface->pNext;
-    }
+    TInterface *interface = interfaceListFind(interfaceList, param->slot, param->port);
 
     if (interface == NULL) {
         // Add new interface
@@ -368,12 +363,7 @@ int cfgGet(const char *fName, tCommandParam *const param) {
 
     int result = 0;
 
-    TInterface *interface = interfaceList;
-    while (interface != NULL) {
-        if ((interface->slot == param->slot) && (interface->port == param->port))
-            break;
-        interface = interface->pNext;
-    }
+    TInterface *interface = interfaceListFind(interfaceList, param->slot, param->port);
 
     if (interface == NULL) {
         fprintf(stderr, "Error: s/p not found\n");
