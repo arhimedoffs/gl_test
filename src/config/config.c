@@ -65,6 +65,22 @@ void interfaceListDelete(TInterface *list) {
 }
 
 /**
+ * Find interface element by slot and port
+ * @retval Pointer to interface structure, NULL if not found
+ */
+TInterface* interfaceListFind(TInterface *list, int slot, int port) {
+    if (list == NULL)
+        return NULL;
+    TInterface *interface = list;
+    while (interface != NULL) {
+        if ((interface->slot == slot) && (interface->port == port))
+            return interface;
+        interface = interface->pNext;
+    }
+    return NULL;
+}
+
+/**
  * Write interface list to text file with formatting
  * Interface without options skipped!
  */
@@ -239,9 +255,13 @@ TInterface* readConfigFromFile(FILE *file) {
                 interfaceList = NULL;
                 break;
             }
-            // TODO: potential error if not trialing '"' exist
-            optionValue[strlen(optionValue)-1] = '\0'; // remove trialing '"'
-            if (strlen(optionValue) >= MAX_VALUE_LEN) {
+            
+            int optionValueLen = strlen(optionValue);
+            if (optionValueLen > 0) {
+                if (optionValue[optionValueLen-1] == '\"')
+                    optionValue[--optionValueLen] = '\0'; // remove trialing '"'
+            }
+            if (optionValueLen >= MAX_VALUE_LEN) {
                 fprintf(stderr, "Option value too long <%s>\n", optionValue);
                 interfaceListDelete(interfaceList);
                 interfaceList = NULL;
