@@ -7,8 +7,10 @@ CONFFILE = sp2.cfg
 # Decide whether the commands will be shwon or not
 VERBOSE = TRUE
 
-SOURCEDIRS = $(foreach dir, $(DIRS), $(addprefix $(SOURCEDIR)/, $(dir)))
-TARGETDIRS = $(foreach dir, $(DIRS), $(addprefix $(BUILDDIR)/, $(dir)))
+# SOURCEDIRS = $(foreach dir, $(DIRS), $(addprefix $(SOURCEDIR)/, $(dir)))
+# TARGETDIRS = $(foreach dir, $(DIRS), $(addprefix $(BUILDDIR)/, $(dir)))
+SOURCEDIRS = $(SOURCEDIR)
+TARGETDIRS = $(BUILDDIR)
 
 # Generate the GCC includes parameters by adding -I before each source folder
 INCLUDES = $(foreach dir, $(SOURCEDIRS), $(addprefix -I, $(dir)))

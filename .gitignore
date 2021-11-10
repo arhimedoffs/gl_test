@@ -45,5 +45,6 @@ Mkfile.old
 dkms.conf
 
 # project specific
-gl_configurator
+!build/Makefile
+build/
 .vscode/
