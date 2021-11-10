@@ -66,15 +66,18 @@ void interfaceListDelete(TInterface *list) {
 
 /**
  * Write interface list to text file with formatting
+ * Interface without options skipped!
  */
 void interfaceListWrite(FILE *file, const TInterface *list) {
     if(file == NULL)
         return;
     while (list != NULL) {
-        fprintf(file, "interface %d/%d\n", list->slot, list->port);
-        for(int i = 0; i < list->optionsCount; i++)
-            fprintf(file, "    %s \"%s\"\n", list->options[i].name, list->options[i].value);
-        fprintf(file, "\n");
+        if (list->optionsCount > 0) {
+            fprintf(file, "interface %d/%d\n", list->slot, list->port);
+            for(int i = 0; i < list->optionsCount; i++)
+                fprintf(file, "    %s \"%s\"\n", list->options[i].name, list->options[i].value);
+            fprintf(file, "\n");
+        }
         list = list->pNext;
     }
 }
