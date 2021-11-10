@@ -45,6 +45,6 @@ Mkfile.old
 dkms.conf
 
 # project specific
-!build/Makefile
 build/
+!build/Makefile
 .vscode/

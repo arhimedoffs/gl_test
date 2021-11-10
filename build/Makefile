@@ -7,10 +7,12 @@ CONFFILE = sp2.cfg
 # Decide whether the commands will be shwon or not
 VERBOSE = TRUE
 
-# SOURCEDIRS = $(foreach dir, $(DIRS), $(addprefix $(SOURCEDIR)/, $(dir)))
-# TARGETDIRS = $(foreach dir, $(DIRS), $(addprefix $(BUILDDIR)/, $(dir)))
-SOURCEDIRS = $(SOURCEDIR)
-TARGETDIRS = $(BUILDDIR)
+# target executable
+TARGET=gl_configurator
+
+DIRS = config cli
+SOURCEDIRS = $(foreach dir, $(DIRS), $(addprefix $(SOURCEDIR)/, $(dir)))
+TARGETDIRS = $(foreach dir, $(DIRS), $(addprefix $(BUILDDIR)/, $(dir)))
 
 # Generate the GCC includes parameters by adding -I before each source folder
 INCLUDES = $(foreach dir, $(SOURCEDIRS), $(addprefix -I, $(dir)))
@@ -55,22 +57,23 @@ else
 	HIDE = @
 endif
 
+# C flags
+CFLAGS=-Wall -Wextra -O2 -g -DCONF_FILE=${CONFFILE}
+# Linking flags
+LDFLAGS=
+
 # Define the function that will generate each rule
 define generateRules
 $(1)/%.o: %.c
 	@echo Building $$@
-	$(HIDE)$(CC) -c $$(INCLUDES) -o $$(subst /,$$(PSEP),$$@) $$(subst /,$$(PSEP),$$<) -MMD
+	$(HIDE)$(CC) -c $$(INCLUDES) $$(CFLAGS) -o $$(subst /,$$(PSEP),$$@) $$(subst /,$$(PSEP),$$<) -MMD
 endef
-
-CFLAGS=-Wall -Wextra -O2 -g -DCONF_FILE=${CONFFILE}# C flags
-LDFLAGS=# linking flags
-TARGET=gl_configurator# target executable
 
 all: directories $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(HIDE)echo Linking $@
-	$(HIDE)$(CC) $(OBJS) -o $(TARGET)
+	$(HIDE)$(CC) $(LDFLAGS) $(OBJS) -o $(TARGET)
 
 # Include dependencies
 -include $(DEPS)
@@ -87,37 +90,17 @@ clean:
 	$(HIDE)$(RM) $(TARGET) $(ERRIGNORE)
 	@echo Cleaning done ! 
 
-# .PHONY: all
-# all: ${TARGET}
+test: $(TARGET)
+	./$(TARGET) add "0/0" "name1" "value1"
+	./$(TARGET) add "0/1-0/3" "nameRange" "valueRange"
+	./$(TARGET) add "1/1-2/2" "nameRange2" "valueRange2"
+	./$(TARGET) add "0/2" "nameRange" "valueNew"
+	./$(TARGET) get "0/2" "nameRange"
+	./$(TARGET) get "0/0" "nameNotExist"
+	./$(TARGET) get "2/2" "nameSome"
+	./$(TARGET) del "0/3" "nameRange"
+	./$(TARGET) del "0/0" "nameNotExist"
+	./$(TARGET) del "2/2" "nameSome"
 
-# $(TARGET): $(OBJS)
-# 	$(CC) ${LDFLAGS} -o $@ $^
-
-# $(SRCS:.c=.d):%.d:%.c
-# 	$(CC) $(CFLAGS) -MM $< >$@
-
-# include $(SRCS:.c=.d)
-
-# .PHONY: clean
-# clean:
-# 	-${RM} ${TARGET} ${OBJS} $(SRCS:.c=.d) ${TEST_FILE}
-
-# .PHONY: run
-# run: ${TARGET}
-# 	./${TARGET}
-
-# .PHONY: test
-# test: ${TARGET}
-# 	./${TARGET} add "0/0" "name1" "value1"
-# 	./${TARGET} add "0/1-0/3" "nameRange" "valueRange"
-# 	./${TARGET} add "1/1-2/2" "nameRange2" "valueRange2"
-# 	./${TARGET} add "0/2" "nameRange" "valueNew"
-# 	./${TARGET} get "0/2" "nameRange"
-# 	./${TARGET} get "0/0" "nameNotExist"
-# 	./${TARGET} get "2/2" "nameSome"
-# 	./${TARGET} del "0/3" "nameRange"
-# 	./${TARGET} del "0/0" "nameNotExist"
-# 	./${TARGET} del "2/2" "nameSome"
-
-# test_get: ${TARGET}
-# 	./${TARGET} get "1/2" "name1"
+test_get: $(TARGET)
+	./$(TARGET) get "1/2" "name1"
