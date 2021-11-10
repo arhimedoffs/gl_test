@@ -11,15 +11,17 @@ const char configPath[] = STRINGIZE_VALUE_OF(CONF_FILE);
 const char configPath[] = "sp.cfg";
 #endif
 
-const char usageInfo[] = "Demo program with configuration file\n\
+const char usageInfo[] = "\
+Demo program with configuration file\n\
 Usage: gl_configurator <command> <options>\n\
-\n\"add\" - create a new entry in config file or update the existing one\n\
-> gl_configurator add \"<s_p>\" \"<option_name>\" \"<option_value>\"\n\
-> gl_configurator add \"<s_p_range>\" \"<option_name>\" \"<option_value>\"\n\
-\n\"get\" - get the value of the option\n\
-> gl_configurator get \"<s_p>\" \"<option_name>\"\n\
-\n\"del\" - delete the option\n\
-> gl_configurator del \"<s_p>\" \"<option_name>\"\n";
+Commands:\n\
+    add - create a new entry in config file or update the existing one\n\
+        > gl_configurator add \"<s_p>\" \"<option_name>\" \"<option_value>\"\n\
+        > gl_configurator add \"<s_p_range>\" \"<option_name>\" \"<option_value>\"\n\
+    get - get the value of the option\n\
+        > gl_configurator get \"<s_p>\" \"<option_name>\"\n\
+    del - delete the option\n\
+        > gl_configurator del \"<s_p>\" \"<option_name>\"\n";
 
 void printHelp(void) {
     printf(usageInfo);
