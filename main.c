@@ -185,6 +185,8 @@ int main(int argc, char* argv[]) {
             break;
         case CMD_DEL:
             exitCode = cfgDel(configPath, &cmdParams);
+            if (exitCode > 0)
+                exitCode = 0;
             break;
         default:
             fprintf(stderr, "Command not implemented\n");

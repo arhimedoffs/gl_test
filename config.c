@@ -23,6 +23,9 @@ typedef struct TInterface {
 } TInterface;
 
 
+/**
+ * Create new interface node and allocate memory for options
+ */
 TInterface* interfaceCreate(void) {
     TInterface *interface = NULL;
     interface = (TInterface*)calloc(1, sizeof(TInterface));
@@ -39,13 +42,20 @@ TInterface* interfaceCreate(void) {
     return interface;
 }
 
+/**
+ * Free options memory and destroy interface
+ */
 void interfaceDelete(TInterface *interface) {
     if (interface == NULL)
         return;
-    free(interface->options);
+    if (interface->options != NULL)
+        free(interface->options);
     free(interface);
 }
 
+/**
+ * Delete full interfaces list
+ */
 void interfaceListDelete(TInterface *list) {
     while (list != NULL) {
         TInterface *next = list->pNext;
@@ -54,6 +64,9 @@ void interfaceListDelete(TInterface *list) {
     }
 }
 
+/**
+ * Write interface list to text file with formatting
+ */
 void interfaceListWrite(FILE *file, const TInterface *list) {
     if(file == NULL)
         return;
@@ -67,7 +80,8 @@ void interfaceListWrite(FILE *file, const TInterface *list) {
 }
 
 /**
- * @retval option index if found, negative othervise
+ * Find option index by name
+ * @retval option index if found, -1 othervise
  */
 int interfaceOptionFind(const TInterface *interface, const char *optionName) {
     if ((interface == NULL) || (optionName == NULL))
@@ -80,11 +94,14 @@ int interfaceOptionFind(const TInterface *interface, const char *optionName) {
         if (strcmp(optionName, interface->options[i].name) == 0)
             break;
     }
+    if (i >= interface->optionsCount)
+        return -1;
     return i;
 }
 
 /**
- * @return negative on error, 0 on update in place, positive on add new
+ * Add if not exist or modify interface option
+ * @return negative on error, modified option index otherwise
  */
 // TODO: check actual string values length
 int interfaceOptionSet(TInterface *interface, const char *optionName, const char *optionValue) {
@@ -94,13 +111,11 @@ int interfaceOptionSet(TInterface *interface, const char *optionName, const char
         return -1;
     
     // Search if option already exist
-    int i = interfaceOptionFind(interface, optionName);
+    int optionIndex = interfaceOptionFind(interface, optionName);
 
-    int retVal = 0;
-    if ((i >= 0) && (i < interface->optionsCount)) {
+    if (optionIndex >= 0) {
         // Update existing option
-        strcpy(interface->options[i].value, optionValue);
-        retVal = 0;
+        strcpy(interface->options[optionIndex].value, optionValue);
     } else {
         // Add new option
         if (interface->optionsCount >= interface->_optionsReserved) {
@@ -111,15 +126,15 @@ int interfaceOptionSet(TInterface *interface, const char *optionName, const char
             interface->options = newOptions;
             interface->_optionsReserved += OPTION_ALLOCATION_STEP;
         }
-        int newIndex = interface->optionsCount++;
-        strcpy(interface->options[newIndex].name, optionName);
-        strcpy(interface->options[newIndex].value, optionValue);
-        retVal = 1;
+        optionIndex = interface->optionsCount++;
+        strcpy(interface->options[optionIndex].name, optionName);
+        strcpy(interface->options[optionIndex].value, optionValue);
     }
-    return retVal;
+    return optionIndex;
 }
 
 /**
+ * Delete interface option if exist
  * @retval number of deleted elements, negative on error
  */
 int interfaceOptionDel(TInterface *interface, const char *optionName) {
@@ -139,9 +154,10 @@ int interfaceOptionDel(TInterface *interface, const char *optionName) {
 }
 
 /**
+ * Check if string consists only from space symbols
  * @return 0 if string is not empty, 1 otherwise
  */
-int isEmptyString(const char* str) {
+static int isEmptyString(const char* str) {
     if (str == NULL)
         return 0;
     char ch = *(str++);
@@ -154,16 +170,11 @@ int isEmptyString(const char* str) {
 }
 
 /**
- * Read configuration from file
+ * Read configuration from text file
  * @param fname file name
  * @return pointer to set of readed interfaces
  */
-TInterface* readConfigFromFile(const char *fname) {
-    FILE *file = fopen(fname, "r");
-    if (file == NULL) {
-        fprintf(stderr, "Failed to open file for read <%s>\n", fname);
-        return NULL;
-    }
+TInterface* readConfigFromFile(FILE *file) {
     // TODO: potential problem if line is longer
     const int lineBufSize = 128;
     char lineBuf[lineBufSize];
@@ -236,7 +247,6 @@ TInterface* readConfigFromFile(const char *fname) {
             interfaceOptionSet(lastInterface, optionName, optionValue);
         }
     }
-    fclose(file);
     return interfaceList;
 }
 
@@ -263,11 +273,13 @@ int cfgAdd(const char *fName, const tCommandParam *const param) {
     if((fName == NULL) || (param == NULL))
         return -1;
 
-    // TODO: If file not exist try to create new
+    TInterface *interfaceList = NULL;
 
-    TInterface *interfaceList = readConfigFromFile(fName);
-    if (interfaceList == NULL)
-        return 0;
+    FILE *file = fopen(fName, "r");
+    if (file != NULL) {
+        interfaceList = readConfigFromFile(file);
+        fclose(file);
+    }
 
     int result = 0;
 
@@ -282,13 +294,17 @@ int cfgAdd(const char *fName, const tCommandParam *const param) {
         // Add new interface
         TInterface *newInterface = interfaceCreate();
         if (newInterface == NULL) {
-            fprintf(stderr, "cfgAdd internal error\n");
+            fprintf(stderr, "Error: cfgAdd internal error\n");
             result = -1;
         } else {
             TInterface *lastInterface = interfaceList;
-            while(lastInterface->pNext != NULL)
-                lastInterface = lastInterface->pNext;
-            lastInterface = lastInterface->pNext = newInterface;
+            if (interfaceList == NULL)
+                lastInterface = interfaceList = newInterface;
+            else {
+                while(lastInterface->pNext != NULL)
+                    lastInterface = lastInterface->pNext;
+                lastInterface = lastInterface->pNext = newInterface;
+            }
             newInterface = NULL;
             lastInterface->slot = param->slot;
             lastInterface->port = param->port;
@@ -314,7 +330,16 @@ int cfgGet(const char *fName, tCommandParam *const param) {
     if((fName == NULL) || (param == NULL))
         return -1;
     
-    TInterface *interfaceList = readConfigFromFile(fName);
+    TInterface *interfaceList = NULL;
+
+    FILE *file = fopen(fName, "r");
+    if (file != NULL) {
+        interfaceList = readConfigFromFile(file);
+        fclose(file);
+    } else {
+        fprintf(stderr, "Error: file <%s> not found\n", fName);
+        return -1;
+    }
     if (interfaceList == NULL)
         return 0;
 
@@ -342,11 +367,25 @@ int cfgGet(const char *fName, tCommandParam *const param) {
     interfaceListDelete(interfaceList);
     return result;
 }
+
+/**
+ * Delete interface option
+ * @return -1 if error, 0 if option not found, 1 otherwise
+ */ 
 int cfgDel(const char *fName, const tCommandParam *const param) {
     if((fName == NULL) || (param == NULL))
         return -1;
     
-    TInterface *interfaceList = readConfigFromFile(fName);
+    TInterface *interfaceList = NULL;
+
+    FILE *file = fopen(fName, "r");
+    if (file != NULL) {
+        interfaceList = readConfigFromFile(file);
+        fclose(file);
+    } else {
+        fprintf(stderr, "Error: file <%s> not found\n", fName);
+        return -1;
+    }
     if (interfaceList == NULL)
         return 0;
 
