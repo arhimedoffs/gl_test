@@ -2,7 +2,14 @@
 #include <string.h>
 #include "config.h"
 
+#define STRINGIZE(x) #x
+#define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
+
+#if defined(CONF_FILE)
+const char configPath[] = STRINGIZE_VALUE_OF(CONF_FILE);
+#else
 const char configPath[] = "sp.cfg";
+#endif
 
 const char usageInfo[] = "Demo program with configuration file\n\
 Usage: gl_configurator <command> <options>\n\

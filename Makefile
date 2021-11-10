@@ -1,5 +1,6 @@
 CC=gcc# C compiler
-CFLAGS=-Wall -Wextra -O2 -g# C flags
+CONFFILE=sp2.cfg# Configuration filename
+CFLAGS=-Wall -Wextra -O2 -g -DCONF_FILE=${CONFFILE}# C flags
 LDFLAGS=# linking flags
 RM=rm -f# rm command
 TARGET=gl_configurator# target executable
