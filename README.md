@@ -2,18 +2,17 @@
 
 ## TODO
 
-- [ ] open config file with presence check
+- [x] open config file with presence check
   - [ ] if file is present but can not be opened - show corresponding message
-- [ ] read config to internal structure
-  - [ ] create configuration structures types
-  - [ ] check read data for correctness
-    - [ ] if incorrect data is present then show corresponding message
-- [ ] write configuration structures to file
+- [x] read config to internal structure
+  - [x] create configuration structures types
+  - [x] check read data for correctness
+- [x] write configuration structures to file
 - [x] stub for configuration methods
 - [x] parse command line arguments
-- [ ] implement `get` method
-- [ ] implement `add` method
-- [ ] implement `del` method
+- [x] implement `get` method
+- [x] implement `add` method
+- [x] implement `del` method
 - [ ] cleanup code formatting and styling
 - [ ] extract source to separate folders
 - [ ] build into separate folder
