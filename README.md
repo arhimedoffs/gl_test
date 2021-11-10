@@ -14,7 +14,8 @@
 - [x] implement `add` method
 - [x] implement `del` method
 - [ ] cleanup code formatting and styling
-- [ ] extract source to separate folders
-- [ ] build into separate folder
-- [ ] separate configuration management as static libary
+- [x] extract source to separate folders
+- [x] build into separate folder
+- [x] separate configuration management as static libary
+- [ ] rewrite Makefile with templates
 - [ ] check portability on few OSes
