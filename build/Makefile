@@ -2,7 +2,7 @@ PROJDIR := $(realpath $(CURDIR)/..)
 SOURCEDIR := $(PROJDIR)/src
 BUILDDIR := $(PROJDIR)/build
 # Configuration filename
-CONFFILE = sp2.cfg
+CONFFILE = sp.cfg
 
 # Decide whether the commands will be shwon or not
 VERBOSE = TRUE

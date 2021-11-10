@@ -8,7 +8,7 @@
 #if defined(CONF_FILE)
 const char configPath[] = STRINGIZE_VALUE_OF(CONF_FILE);
 #else
-const char configPath[] = "sp.cfg";
+const char configPath[] = "/etc/sp.cfg";
 #endif
 
 const char usageInfo[] = "\
