@@ -163,7 +163,7 @@ int interfaceOptionDel(TInterface *interface, const char *optionName) {
         return -1;
     
     int optionIndex = interfaceOptionFind(interface, optionName);
-    if ((optionIndex < 0) || (optionIndex >= interface->optionsCount)) {
+    if (optionIndex < 0) {
         return 0;
     }
     for (int i  = optionIndex+1; i < interface->optionsCount; i++)
@@ -292,7 +292,7 @@ void writeConfigToFile(const char *fname, const TInterface *interfaceList) {
  * Add or modify interface options
  * @return number of successfully modified options, -1 if error occured
  */
-int cfgAdd(const char *fName, const tCommandParam *const param) {
+int cfgAdd(const char *fName, const tCommandParam *param) {
     if((fName == NULL) || (param == NULL))
         return -1;
 
@@ -344,7 +344,7 @@ int cfgAdd(const char *fName, const tCommandParam *const param) {
  * Get option value if found
  * @return negative on error, 0 if not found, 1 if success
  */
-int cfgGet(const char *fName, tCommandParam *const param) {
+int cfgGet(const char *fName, tCommandParam *param) {
     if((fName == NULL) || (param == NULL))
         return -1;
     
@@ -369,7 +369,7 @@ int cfgGet(const char *fName, tCommandParam *const param) {
         fprintf(stderr, "Error: s/p not found\n");
     } else {
         int optionIndex = interfaceOptionFind(interface, param->option);
-        if ((optionIndex < 0) || (optionIndex >= interface->optionsCount))
+        if (optionIndex < 0)
             fprintf(stderr, "Error: option not found\n");
         else {
             strcpy(param->value, interface->options[optionIndex].value);
@@ -385,7 +385,7 @@ int cfgGet(const char *fName, tCommandParam *const param) {
  * Delete interface option
  * @return -1 if error, 0 if option not found, 1 otherwise
  */ 
-int cfgDel(const char *fName, const tCommandParam *const param) {
+int cfgDel(const char *fName, const tCommandParam *param) {
     if((fName == NULL) || (param == NULL))
         return -1;
     
@@ -404,12 +404,7 @@ int cfgDel(const char *fName, const tCommandParam *const param) {
 
     int result = 0;
 
-    TInterface *interface = interfaceList;
-    while (interface != NULL) {
-        if ((interface->slot == param->slot) && (interface->port == param->port))
-            break;
-        interface = interface->pNext;
-    }
+    TInterface *interface = interfaceListFind(interfaceList, param->slot, param->port);
 
     if (interface == NULL) {
         fprintf(stderr, "Error: s/p not found\n");

@@ -5,6 +5,14 @@
 #define STRINGIZE(x) #x
 #define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
 
+typedef enum tCommand {
+    CMD_EMPTY = 0,
+    CMD_ADD,
+    CMD_GET,
+    CMD_DEL,
+    CMD_NOT_EXIST
+} tCommand;
+
 #if defined(CONF_FILE)
 const char configPath[] = STRINGIZE_VALUE_OF(CONF_FILE);
 #else
