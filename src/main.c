@@ -54,7 +54,7 @@ int parseSlotPort(const char *opt, tCommandParam *params) {
             params->slotRange = -1;
             params->portRange = -1;
         } else {
-            fprintf(stderr, "Unrecognised slot-port pair <%s>\n", opt);
+            fprintf(stderr, "Error: Unrecognised slot-port pair <%s>\n", opt);
             readedParams = -1;
         }
     }
@@ -64,7 +64,7 @@ int parseSlotPort(const char *opt, tCommandParam *params) {
 int parseOptionName(const char *opt, tCommandParam *params) {
     int len = strlen(opt);
     if (len > MAX_NAME_LEN) {
-        fprintf(stderr, "Name length too long\n");
+        fprintf(stderr, "Error: Name length too long\n");
         return -1;
     }
     strcpy(params->option, opt);
@@ -74,7 +74,7 @@ int parseOptionName(const char *opt, tCommandParam *params) {
 int parseOptionValue(const char *opt, tCommandParam *params) {
     int len = strlen(opt);
     if (len > MAX_NAME_LEN) {
-        fprintf(stderr, "Value length too long\n");
+        fprintf(stderr, "Error: Value length too long\n");
         return -1;
     }
     strcpy(params->value, opt);
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
         case CMD_ADD:
         {
             if (argc != 5) {
-                fprintf(stderr, "Incorrect number of add params\n");
+                fprintf(stderr, "Error: Incorrect number of add params\n");
                 exitCode = -2;
                 break;
             }
@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
         case CMD_GET:
         {
             if (argc != 4) {
-                fprintf(stderr, "Incorrect number of get params\n");
+                fprintf(stderr, "Error: Incorrect number of get params\n");
                 exitCode = -2;
                 break;
             }
@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
         case CMD_DEL:
         {
             if (argc != 4) {
-                fprintf(stderr, "Incorrect number of del params\n");
+                fprintf(stderr, "Error: Incorrect number of del params\n");
                 exitCode = -2;
                 break;
             }
@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
         }
         break;
         default:
-            fprintf(stderr, "Unrecognised command <%s>\n", argv[1]);
+            fprintf(stderr, "Error: Unrecognised command <%s>\n", argv[1]);
             exitCode = -1;
     }
 
@@ -179,10 +179,10 @@ int main(int argc, char* argv[]) {
             if (cmdParams.slotRange < 0 && cmdParams.portRange < 0) {
                 exitCode = cfgAdd(configPath, &cmdParams);
             } else if (cmdParams.slot != cmdParams.slotRange) {
-                fprintf(stderr, "Slot range not implemented!\n");
+                fprintf(stderr, "Error: Slot range not implemented!\n");
                 exitCode = 1;
             } else if (cmdParams.port > cmdParams.portRange) {
-                fprintf(stderr, "Incorrect port range!\n");
+                fprintf(stderr, "Error: Incorrect port range!\n");
                 exitCode = 1;
             } else {
                 for (int i = cmdParams.port; i <= cmdParams.portRange; i++) {
@@ -206,7 +206,7 @@ int main(int argc, char* argv[]) {
                 exitCode = 0;
             break;
         default:
-            fprintf(stderr, "Command not implemented\n");
+            fprintf(stderr, "Error: Command not implemented\n");
     }
 
     return exitCode;

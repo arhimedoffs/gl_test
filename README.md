@@ -3,7 +3,6 @@
 ## TODO
 
 - [x] open config file with presence check
-  - [ ] if file is present but can not be opened - show corresponding message
 - [x] read config to internal structure
   - [x] create configuration structures types
   - [x] check read data for correctness
@@ -13,9 +12,7 @@
 - [x] implement `get` method
 - [x] implement `add` method
 - [x] implement `del` method
-- [ ] cleanup code formatting and styling
 - [x] extract source to separate folders
 - [x] build into separate folder
 - [x] separate configuration management as static libary
 - [ ] rewrite Makefile with templates
-- [ ] check portability on few OSes

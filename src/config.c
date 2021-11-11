@@ -203,7 +203,7 @@ TInterface* readConfigFromFile(FILE *file) {
     TInterface* lastInterface = NULL;
     while (fgets(lineBuf, lineBufSize, file) != NULL) {
         if (strlen(lineBuf) >= (lineBufSize-1)) {
-            fprintf(stderr, "Too long line in file\n");
+            fprintf(stderr, "Error: Too long line in file\n");
             interfaceListDelete(interfaceList);
             interfaceList = NULL;
             break;
@@ -214,7 +214,7 @@ TInterface* readConfigFromFile(FILE *file) {
         int isInterface = strcmp(lineBuf, "interface");
         if (isInterface > 0) {
             if (sscanf(lineBuf, "interface %d/%d", &slot, &port) < 2) {
-                fprintf(stderr, "Unrecognised interface line %s\n", lineBuf);
+                fprintf(stderr, "Error: Unrecognised interface line %s\n", lineBuf);
                 interfaceListDelete(interfaceList);
                 interfaceList = NULL;
                 break;
@@ -223,7 +223,7 @@ TInterface* readConfigFromFile(FILE *file) {
             // create new interface
             TInterface* newInterface = interfaceCreate();
             if (newInterface == NULL) {
-                fprintf(stderr, "readConfigFromFile internal error\n");
+                fprintf(stderr, "Error: readConfigFromFile internal error\n");
                 interfaceListDelete(interfaceList);
                 interfaceList = NULL;
                 break;
@@ -237,20 +237,20 @@ TInterface* readConfigFromFile(FILE *file) {
             lastInterface->port = port;
         } else { // option line
             if (lastInterface == NULL) {
-                fprintf(stderr, "Option line before interface definition\n");
+                fprintf(stderr, "Error: Option line before interface definition\n");
                 break;
             }
             char optionName[lineBufSize];
             char optionValue[lineBufSize];
             optionName[0] = optionValue[0] = '\0';
             if (sscanf(lineBuf, " %s \"%s\"", optionName, optionValue) < 2) {
-                fprintf(stderr, "Unrecognised option line <%s>\n", lineBuf);
+                fprintf(stderr, "Error: Unrecognised option line <%s>\n", lineBuf);
                 interfaceListDelete(interfaceList);
                 interfaceList = NULL;
                 break;
             }
             if (strlen(optionName) >= MAX_NAME_LEN) {
-                fprintf(stderr, "Option name too long <%s>\n", optionName);
+                fprintf(stderr, "Error: Option name too long <%s>\n", optionName);
                 interfaceListDelete(interfaceList);
                 interfaceList = NULL;
                 break;
@@ -262,7 +262,7 @@ TInterface* readConfigFromFile(FILE *file) {
                     optionValue[--optionValueLen] = '\0'; // remove trialing '"'
             }
             if (optionValueLen >= MAX_VALUE_LEN) {
-                fprintf(stderr, "Option value too long <%s>\n", optionValue);
+                fprintf(stderr, "Error: Option value too long <%s>\n", optionValue);
                 interfaceListDelete(interfaceList);
                 interfaceList = NULL;
                 break;
@@ -281,7 +281,7 @@ TInterface* readConfigFromFile(FILE *file) {
 void writeConfigToFile(const char *fname, const TInterface *interfaceList) {
     FILE *file = fopen(fname, "w");
     if (file == NULL) {
-        fprintf(stderr, "Failed to open file for write <%s>\n", fname);
+        fprintf(stderr, "Error: Failed to open file for write <%s>\n", fname);
         return;
     }
     interfaceListWrite(file, interfaceList);
